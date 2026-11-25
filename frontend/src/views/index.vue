@@ -122,10 +122,8 @@
       />
     </div>
     <div class="flex justify-center items-center text-blue-400" id="bottom">
+      <span class="px-2 py-1">{{ t('footer.author_label') }} {{ t('footer.name') }}</span>
       <span class="cursor-pointer px-2 py-1" @click="BrowserOpenURL(certUrl)">{{ t('footer.cert_download') }}</span>
-      <span class="cursor-pointer px-2 py-1" @click="BrowserOpenURL('https://github.com/putyy/res-downloader')">{{ t('footer.source_code') }}</span>
-      <span class="cursor-pointer px-2 py-1" @click="BrowserOpenURL('https://github.com/putyy/res-downloader/issues')">{{ t('footer.help') }}</span>
-      <span class="cursor-pointer px-2 py-1" @click="BrowserOpenURL('https://github.com/putyy/res-downloader/releases')">{{ t('footer.update_log') }}</span>
     </div>
     <Preview v-model:showModal="showPreviewRow" :previewRow="previewRow"/>
     <ShowLoading :loadingText="loadingText" :isLoading="loading"/>
@@ -733,7 +731,7 @@ const batchDown = async () => {
   }
 
   data.value.forEach((item, index) => {
-    if (checkedRowKeysValue.value.includes(item.Id) && item.Classify !== 'live' && item.Classify !== 'm3u8') {
+    if (checkedRowKeysValue.value.includes(item.Id) && item.Classify !== 'live') {
       download(item, index)
     }
   })

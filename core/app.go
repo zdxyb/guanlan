@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"res-downloader/core/shared"
-	"strconv"
-	"time"
 )
 
 type App struct {
@@ -50,10 +48,10 @@ func GetApp(assets embed.FS, wjs string) *App {
 
 		appOnce = &App{
 			assets:      assets,
-			AppName:     "res-downloader",
+			AppName:     "观澜下载器",
 			Version:     version,
-			Description: "res-downloader是一款集网络资源嗅探 + 高速下载功能于一体的软件，高颜值、高性能和多样化，提供个人用户下载自己上传到各大平台的网络资源功能！",
-			Copyright:   "Copyright © 2023~" + strconv.Itoa(time.Now().Year()),
+			Description: "在本机开启代理后，把正在浏览的视频、音频、图片等资源列出来，方便预览或下载。",
+			Copyright:   "D.C.B.A.",
 			IsReset:     false,
 			PublicCrt: []byte(`-----BEGIN CERTIFICATE-----
 MIIDwzCCAqugAwIBAgIUFAnC6268dp/z1DR9E1UepiWgWzkwDQYJKoZIhvcNAQEL
@@ -109,7 +107,7 @@ ILKEQKmPPzKs7kp/7Nz+2cT3
 -----END PRIVATE KEY-----
 `),
 		}
-		appOnce.UserDir = filepath.Join(userdir.GetConfigHome(), appOnce.AppName)
+		appOnce.UserDir = filepath.Join(userdir.GetConfigHome(), "res-downloader")
 		err := os.MkdirAll(appOnce.UserDir, 0750)
 		if err != nil {
 			fmt.Println("Mkdir UserDir err: ", err.Error())
@@ -117,6 +115,7 @@ ILKEQKmPPzKs7kp/7Nz+2cT3
 		appOnce.LockFile = filepath.Join(appOnce.UserDir, "install.lock")
 		initLogger()
 		initConfig()
+		initLicense()
 		initProxy()
 		initResource()
 		initHttpServer()
@@ -204,6 +203,7 @@ func (a *App) ResetApp() error {
 	_ = os.Remove(filepath.Join(appOnce.UserDir, "pass.cache"))
 	_ = os.Remove(filepath.Join(appOnce.UserDir, "config.json"))
 	_ = os.Remove(filepath.Join(appOnce.UserDir, "cert.crt"))
+	_ = os.Remove(filepath.Join(appOnce.UserDir, "license.json"))
 
 	cmd := exec.Command(exePath)
 	cmd.Start()

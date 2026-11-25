@@ -1,3 +1,5 @@
+//go:build !issuer
+
 package main
 
 import (

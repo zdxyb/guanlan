@@ -90,11 +90,21 @@ func (r *Resource) delete(sign string) {
 
 func (r *Resource) cancel(id string) error {
 	if d, ok := r.tasks.Load(id); ok {
-		d.(*FileDownloader).Cancel()
-		r.tasks.Delete(id) // 可选：取消后清理
+		if task, ok := d.(interface{ Cancel() }); ok {
+			task.Cancel()
+		}
+		r.tasks.Delete(id)
 		return nil
 	}
 	return errors.New("task not found")
+}
+
+func isPlaylist(mediaInfo shared.MediaInfo, rawUrl string) bool {
+	if mediaInfo.Classify == "m3u8" || strings.EqualFold(mediaInfo.Suffix, ".m3u8") {
+		return true
+	}
+	path := strings.ToLower(strings.Split(rawUrl, "?")[0])
+	return strings.Contains(path, ".m3u8")
 }
 
 func (r *Resource) download(mediaInfo shared.MediaInfo, decodeStr string) {
@@ -155,6 +165,29 @@ func (r *Resource) download(mediaInfo shared.MediaInfo, decodeStr string) {
 		}
 
 		headers, _ := r.parseHeaders(mediaInfo)
+
+		if isPlaylist(mediaInfo, rawUrl) {
+			mediaInfo.SavePath = strings.TrimSuffix(mediaInfo.SavePath, mediaInfo.Suffix) + ".ts"
+			hls := NewHLSDownloader(rawUrl, mediaInfo.SavePath, headers)
+			hlsStart := func(done, total int) {
+				percent := 0
+				if total > 0 {
+					percent = done * 100 / total
+				}
+				r.progressEventsEmit(mediaInfo, strconv.Itoa(percent)+"%", shared.DownloadStatusRunning)
+			}
+			r.tasks.Store(mediaInfo.Id, hls)
+			err := hls.Start(hlsStart)
+			if err != nil {
+				if !strings.Contains(err.Error(), "cancelled") {
+					r.progressEventsEmit(mediaInfo, err.Error())
+				}
+			} else {
+				r.progressEventsEmit(mediaInfo, "complete", shared.DownloadStatusDone)
+			}
+			r.tasks.Delete(mediaInfo.Id)
+			return
+		}
 
 		downloader := NewFileDownloader(rawUrl, mediaInfo.SavePath, globalConfig.TaskNumber, headers)
 		downloader.progressCallback = func(totalDownloaded, totalSize float64, taskID int, taskProgress float64) {

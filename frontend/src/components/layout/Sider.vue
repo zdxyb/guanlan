@@ -1,12 +1,13 @@
 <template>
-  <div class="flex pb-2 flex-col h-full min-w-[80px] border-r border-slate-100 dark:border-slate-900">
+  <div
+      class="flex pb-2 flex-col h-full shrink-0 border-r border-slate-100 dark:border-slate-900"
+      :style="{ width: collapsed ? '70px' : siderWidth + 'px' }"
+  >
     <Screen v-if="envInfo.platform!=='darwin'"></Screen>
     <div class="w-full flex flex-row items-center justify-center pt-5" :class="envInfo.platform==='darwin' ? 'pt-8' : 'pt-2'">
-      <div class="relative flex items-center justify-center cursor-pointer" @click="handleFooterUpdate('github')">
-        <img class="w-12 h-12 rounded-full transition-transform duration-300 hover:scale-105 dark" src="@/assets/image/logo.png" alt="res-downloader logo"/>
-        <span class="absolute right-[-25px] top-0 font-semibold rounded-full bg-red-500 text-white dark:bg-red-600 dark:text-gray-100 text-[10px] px-1.5 py-0.5 animate-pulse" v-if="showUpdate">
-            New
-        </span>
+      <div class="relative flex flex-col items-center justify-center">
+        <img class="w-12 h-12 rounded-2xl" src="@/assets/image/logo.png" :alt="t('app.name')"/>
+        <div class="mt-2 text-xs font-semibold">{{ t('app.name') }}</div>
       </div>
     </div>
     <main class="flex-1 flex-grow-1 mb-5 overflow-auto flex flex-col pt-1 items-center h-full" v-if="is">
@@ -20,7 +21,7 @@
               :on-after-leave="() => { showAppName = false }"
               :collapsed-width="70"
               :collapsed="collapsed"
-              :width="envInfo.platform==='linux' ? 160 : 140"
+              :width="siderWidth"
               :native-scrollbar="false"
               :inverted="inverted"
               :on-update:collapsed="collapsedChange"
@@ -63,16 +64,12 @@ import {
   HelpCircleOutline,
   MoonOutline,
   SunnyOutline,
-  LanguageSharp,
-  LogoGithub
+  LanguageSharp
 } from "@vicons/ionicons5"
 import {useIndexStore} from "@/stores"
 import Footer from "@/components/Footer.vue"
 import Screen from "@/components/Screen.vue"
-import {BrowserOpenURL} from "../../../wailsjs/runtime"
 import {useI18n} from "vue-i18n"
-import request from "@/api/request"
-import {compareVersions} from "@/func"
 
 const {t} = useI18n()
 const route = useRoute()
@@ -84,9 +81,9 @@ const showAppInfo = ref(false)
 const menuValue = ref(route.fullPath.substring(1))
 const store = useIndexStore()
 const is = ref(false)
-const showUpdate = ref(false)
 
 const envInfo = store.envInfo
+const siderWidth = envInfo.platform === "linux" ? 220 : 200
 
 const globalConfig = computed(() => {
   return store.globalConfig
@@ -106,13 +103,6 @@ onMounted(()=>{
     collapsed.value = JSON.parse(collapsedCache).collapsed
   }
   is.value = true
-
-  request({
-    url: 'https://res.putyy.com/version.json?v=' + Date.now(),
-    method: 'get',
-  }).then((res)=>{
-    showUpdate.value = compareVersions(res.version, store.appInfo.Version) === 1
-  })
 })
 
 const renderIcon = (icon: any) => {
@@ -133,11 +123,6 @@ const menuOptions = ref([
 ])
 
 const footerOptions = ref([
-  {
-    label: "github",
-    key: 'github',
-    icon: renderIcon(LogoGithub),
-  },
   {
     label: computed(() => t("menu.locale")),
     key: 'locale',
@@ -162,11 +147,6 @@ const handleUpdateValue = (key: string, item?: MenuOption) => {
 const handleFooterUpdate = (key: string, item?: MenuOption) => {
   if (key === "about") {
     showAppInfo.value = true
-    return
-  }
-
-  if (key === "github") {
-    BrowserOpenURL("https://github.com/putyy/res-downloader")
     return
   }
 
@@ -213,5 +193,10 @@ const collapsedChange = (value: boolean)=>{
 
 .animate-pulse {
   animation: pulse 2s infinite;
+}
+
+:deep(.n-menu-item-content-header) {
+  overflow: visible;
+  text-overflow: unset;
 }
 </style>

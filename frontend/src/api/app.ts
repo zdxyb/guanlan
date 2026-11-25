@@ -113,6 +113,25 @@ export default {
             data: data
         })
     },
+    wxFinderWeb() {
+        return request({
+            url: 'api/wx-finder-web',
+            method: 'post'
+        })
+    },
+    licenseStatus() {
+        return request({
+            url: 'api/license-status',
+            method: 'post'
+        })
+    },
+    activateLicense(code: string) {
+        return request({
+            url: 'api/license-activate',
+            method: 'post',
+            data: {code}
+        })
+    },
     batchExport(data: object) {
         return request({
             url: 'api/batch-export',

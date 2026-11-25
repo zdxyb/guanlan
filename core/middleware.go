@@ -62,8 +62,14 @@ func HandleApi(w http.ResponseWriter, r *http.Request) bool {
 			httpServerOnce.cancel(w, r)
 		case "/api/wx-file-decode":
 			httpServerOnce.wxFileDecode(w, r)
+		case "/api/wx-finder-web":
+			httpServerOnce.wxFinderWeb(w, r)
 		case "/api/batch-export":
 			httpServerOnce.batchExport(w, r)
+		case "/api/license-status":
+			httpServerOnce.licenseStatus(w, r)
+		case "/api/license-activate":
+			httpServerOnce.activateLicense(w, r)
 		case "/api/cert":
 			httpServerOnce.downCert(w, r)
 		}

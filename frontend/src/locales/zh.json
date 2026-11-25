@@ -21,12 +21,15 @@
     "screen_maximize": "最大化",
     "screen_close": "关闭"
   },
+  "app": {
+    "name": "观澜下载器"
+  },
   "menu": {
     "index": "获取资源",
     "setting": "系统设置",
     "locale": "English",
     "theme": "主题更换",
-    "about": "关于我们"
+    "about": "关于此软件"
   },
   "index": {
     "open_grab": "开启抓取",
@@ -109,6 +112,10 @@
     "quality_tip": "视频号有效",
     "full_intercept": "全量拦截",
     "full_intercept_tip": "微信视频号是否全量拦截，否：只拦截视频详情",
+    "wx_finder": "适配微信 4.2 视频号",
+    "wx_finder_tip": "点击后会先结束微信进程（含后台 WeChatAppEx），再备份最近修改的 engineConfig.json，并把 featureSwitch.handleFinder 改为 false，让视频号从本地 LiteApp 改回网页加载。完成后重新打开微信再抓取。微信升级后若又变回本地加载，再点一次。",
+    "wx_finder_done": "已关闭微信并改回网页加载：{path}。请重新打开微信后再抓取。备份：{backup}",
+    "wx_finder_already": "视频号已经是网页加载，无需修改：{path}",
     "insert_tail": "添入尾部",
     "insert_tail_tip": "拦截到新数据是否添加到列表尾部",
     "upstream_proxy": "上游代理",
@@ -130,15 +137,38 @@
     "basic_setting": "基础设置",
     "advanced_setting": "高级设置"
   },
+  "license": {
+    "title": "软件授权",
+    "tip": "请输入发给这台电脑的授权码。通过后才能抓取和下载。",
+    "placeholder": "请输入授权码",
+    "submit": "授权",
+    "quit": "退出",
+    "empty": "请输入授权码",
+    "ok": "授权成功",
+    "until": "有效期至 {date}",
+    "permanent": "长期有效",
+    "missing": "未授权",
+    "update": "更新授权码",
+    "manage": "授权码只对下面这台电脑有效。把电脑识别码发给签发人，拿到授权码后再填到这里。",
+    "machine": "电脑识别码",
+    "copy_machine": "复制识别码"
+  },
+  "issuer": {
+    "title": "签发授权码",
+    "subtitle": "只对填入的那台电脑有效",
+    "machine_placeholder": "粘贴对方软件里的电脑识别码",
+    "machine_empty": "请填写电脑识别码",
+    "days": "有效天数，0 表示长期有效",
+    "generate": "生成授权码",
+    "result": "授权码",
+    "copy": "复制授权码"
+  },
   "footer": {
-    "title": "关于我们",
-    "description": "一款集网络资源嗅探 + 高速下载功能于一体的软件，高颜值、高性能和多样化，提供个人用户下载自己上传到各大平台的网络资源功能！",
-    "support": "支持市面上几乎所有的网络应用",
-    "application": "抖音,快手,小红书,视频号,小程序,公众号,酷狗音乐,QQ音乐,QQ微视,......",
-    "forum": "论坛",
-    "cert_download": "证书下载",
-    "source_code": "软件源码",
-    "help": "帮助支持",
-    "update_log": "更新日志"
+    "title": "关于此软件",
+    "headline": "本地资源嗅探与下载",
+    "author_label": "作者",
+    "name": "D.C.B.A.",
+    "description": "这是一个跑在本机的小工具。开启代理后，它会把你正在浏览的视频、音频、图片等资源列出来，方便预览，也可以下载保存到电脑上。",
+    "cert_download": "证书下载"
   }
 }

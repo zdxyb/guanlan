@@ -21,12 +21,15 @@
     "screen_maximize": "Maximize",
     "screen_close": "Close"
   },
+  "app": {
+    "name": "观澜下载器"
+  },
   "menu": {
     "index": "Intercept",
     "setting": "Setting",
     "locale": "中文",
     "theme": "Theme",
-    "about": "About"
+    "about": "About this software"
   },
   "index": {
     "open_grab": "Start Grabbing",
@@ -109,6 +112,10 @@
     "quality_tip": "Effective for video accounts",
     "full_intercept": "Full Intercept",
     "full_intercept_tip": "Whether to fully intercept WeChat video accounts, No: only intercept video details",
+    "wx_finder": "Adapt WeChat 4.2 Channels",
+    "wx_finder_tip": "Clicking ends WeChat, including WeChatAppEx, then backs up the newest engineConfig.json and sets featureSwitch.handleFinder to false so Channels loads as a web page again. Reopen WeChat before capturing. If an update turns local loading back on, click again.",
+    "wx_finder_done": "WeChat was closed and Channels was switched back to web loading: {path}. Reopen WeChat before capturing. Backup: {backup}",
+    "wx_finder_already": "Channels is already using web loading: {path}",
     "insert_tail": "Insert tail",
     "insert_tail_tip": "Intercept whether new data is added to the end of the list",
     "upstream_proxy": "Upstream Proxy",
@@ -130,15 +137,38 @@
     "basic_setting": "Basic Setting",
     "advanced_setting": "Advanced Setting"
   },
+  "license": {
+    "title": "Activation",
+    "tip": "Enter the activation code issued for this computer. Capture and download stay locked until it is accepted.",
+    "placeholder": "Activation code",
+    "submit": "Activate",
+    "quit": "Quit",
+    "empty": "Enter an activation code",
+    "ok": "Activated",
+    "until": "Valid until {date}",
+    "permanent": "Does not expire",
+    "missing": "Not activated",
+    "update": "Update code",
+    "manage": "A code only works on the computer below. Send the computer ID to whoever issues codes, then enter the code here.",
+    "machine": "Computer ID",
+    "copy_machine": "Copy ID"
+  },
+  "issuer": {
+    "title": "Issue a code",
+    "subtitle": "Works only on the computer you enter",
+    "machine_placeholder": "Paste the computer ID from their app",
+    "machine_empty": "Enter a computer ID",
+    "days": "Days valid, 0 means it does not expire",
+    "generate": "Generate code",
+    "result": "Activation code",
+    "copy": "Copy code"
+  },
   "footer": {
-    "title": "About Us",
-    "description": "A software combining network resource sniffing + high-speed download functions, with high aesthetics, performance and diversity, providing personal users with the ability to download their own resources uploaded to various platforms!",
-    "support": "Supports almost all network applications on the market",
-    "application": "Douyin,Kuaishou,Xiaohongshu,Wechat,Mini Programs,Youtube,Kugou Music,QQ Music,QQ Weishi,......",
-    "forum": "Forum",
-    "cert_download": "Certificate Download",
-    "source_code": "Source Code",
-    "help": "Issues",
-    "update_log": "Update Log"
+    "title": "About this software",
+    "headline": "Local resource capture and download",
+    "author_label": "Author",
+    "name": "D.C.B.A.",
+    "description": "A small tool that runs on your computer. After the proxy is on, it lists videos, audio, and images from the pages you are browsing, so you can preview them or save them locally.",
+    "cert_download": "Certificate Download"
   }
 }

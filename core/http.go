@@ -251,7 +251,46 @@ func (h *HttpServer) setSystemPassword(w http.ResponseWriter, r *http.Request) {
 	h.success(w)
 }
 
+func (h *HttpServer) requireLicense(w http.ResponseWriter) bool {
+	if Licensed() {
+		return true
+	}
+	h.error(w, "请先输入授权码")
+	return false
+}
+
+func (h *HttpServer) licenseStatus(w http.ResponseWriter, r *http.Request) {
+	exp := LicenseExpires()
+	h.success(w, respData{
+		"ok":      Licensed(),
+		"expires": formatLicenseExpiry(exp),
+		"machine": MachineCode(),
+	})
+}
+
+func (h *HttpServer) activateLicense(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Code string `json:"code"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		h.error(w, errInvalidLicense.Error())
+		return
+	}
+	exp, err := activateLicense(data.Code)
+	if err != nil {
+		h.error(w, err.Error())
+		return
+	}
+	h.success(w, respData{
+		"ok":      true,
+		"expires": formatLicenseExpiry(exp),
+	})
+}
+
 func (h *HttpServer) openSystemProxy(w http.ResponseWriter, r *http.Request) {
+	if !h.requireLicense(w) {
+		return
+	}
 	err := appOnce.OpenSystemProxy()
 	if err != nil {
 		h.error(w, err.Error(), respData{
@@ -336,6 +375,9 @@ func (h *HttpServer) delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *HttpServer) download(w http.ResponseWriter, r *http.Request) {
+	if !h.requireLicense(w) {
+		return
+	}
 	var data struct {
 		shared.MediaInfo
 		DecodeStr string `json:"decodeStr"`
@@ -366,7 +408,22 @@ func (h *HttpServer) cancel(w http.ResponseWriter, r *http.Request) {
 	h.success(w)
 }
 
+func (h *HttpServer) wxFinderWeb(w http.ResponseWriter, r *http.Request) {
+	if !h.requireLicense(w) {
+		return
+	}
+	res, err := disableHandleFinder()
+	if err != nil {
+		h.error(w, err.Error())
+		return
+	}
+	h.success(w, res)
+}
+
 func (h *HttpServer) wxFileDecode(w http.ResponseWriter, r *http.Request) {
+	if !h.requireLicense(w) {
+		return
+	}
 	var data struct {
 		shared.MediaInfo
 		Filename  string `json:"filename"`

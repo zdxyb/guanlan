@@ -1,7 +1,13 @@
 <template>
   <div class="h-full relative p-5 overflow-y-auto [&::-webkit-scrollbar]:hidden" :key="renderKey">
     <NTabs type="line" animated>
-      <NTabPane name="basic" :tab="t('setting.basic_setting')">
+      <NTabPane name="basic">
+        <template #tab>
+          <span class="inline-flex items-center">
+            <NIcon size="16" class="mr-1"><SettingsOutline/></NIcon>
+            {{ t('setting.basic_setting') }}
+          </span>
+        </template>
         <NForm
           :model="formValue"
           size="medium"
@@ -65,6 +71,17 @@
             </NTooltip>
           </NFormItem>
 
+          <NFormItem :label="t('setting.wx_finder')">
+            <div class="max-w-[460px]">
+              <NButton strong secondary type="primary" :loading="wxFinderLoading" @click="adaptWxFinder">
+                {{ t("setting.wx_finder") }}
+              </NButton>
+              <div class="mt-2 text-xs leading-5 text-gray-500 whitespace-normal">
+                {{ t("setting.wx_finder_tip") }}
+              </div>
+            </div>
+          </NFormItem>
+
           <NFormItem :label="t('setting.insert_tail')" path="InsertTail">
             <NSwitch v-model:value="formValue.InsertTail"/>
             <NTooltip trigger="hover">
@@ -90,7 +107,78 @@
         </NForm>
       </NTabPane>
 
-      <NTabPane name="advanced" :tab="t('setting.advanced_setting')">
+      <NTabPane name="license">
+        <template #tab>
+          <span class="inline-flex items-center">
+            <NIcon size="16" class="mr-1"><KeyOutline/></NIcon>
+            {{ t('license.title') }}
+          </span>
+        </template>
+        <div class="max-w-[560px] pt-6" style="--wails-draggable:no-drag">
+          <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div class="flex items-center gap-4 bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-5 text-white">
+              <img src="@/assets/image/logo.png" alt="" class="h-14 w-14 rounded-2xl bg-white/20 p-1"/>
+              <div>
+                <div class="text-lg font-semibold">{{ t('license.title') }}</div>
+                <div class="mt-2 inline-flex items-center rounded-full bg-white/20 px-3 py-1 text-sm">
+                  <NIcon size="16" class="mr-1">
+                    <ShieldCheckmarkOutline v-if="licenseOk"/>
+                    <AlertCircleOutline v-else/>
+                  </NIcon>
+                  {{ licenseStatusText }}
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-5">
+              <p class="text-sm leading-6 text-slate-500 dark:text-slate-400">{{ t('license.manage') }}</p>
+              <div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+                <div class="min-w-0">
+                  <div class="text-xs text-slate-500">{{ t('license.machine') }}</div>
+                  <div class="mt-1 truncate font-mono text-sm">{{ machineCode }}</div>
+                </div>
+                <NButton secondary @click="copyMachine">
+                  <template #icon>
+                    <NIcon><CopyOutline/></NIcon>
+                  </template>
+                  {{ t('license.copy_machine') }}
+                </NButton>
+              </div>
+              <NInput
+                  v-model:value="licenseCode"
+                  class="mt-4"
+                  size="large"
+                  :placeholder="t('license.placeholder')"
+                  @keyup.enter="updateLicense"
+              >
+                <template #prefix>
+                  <NIcon size="18"><KeyOutline/></NIcon>
+                </template>
+              </NInput>
+              <NButton
+                  class="mt-3"
+                  type="primary"
+                  size="large"
+                  block
+                  :loading="licenseLoading"
+                  @click="updateLicense"
+              >
+                <template #icon>
+                  <NIcon><RefreshOutline/></NIcon>
+                </template>
+                {{ t('license.update') }}
+              </NButton>
+            </div>
+          </div>
+        </div>
+      </NTabPane>
+
+      <NTabPane name="advanced">
+        <template #tab>
+          <span class="inline-flex items-center">
+            <NIcon size="16" class="mr-1"><OptionsOutline/></NIcon>
+            {{ t('setting.advanced_setting') }}
+          </span>
+        </template>
         <NForm
           :model="formValue"
           size="medium"
@@ -236,8 +324,9 @@
 </template>
 
 <script lang="ts" setup>
-import {HelpCircleOutline} from "@vicons/ionicons5"
-import {ref, watch} from "vue"
+import {AlertCircleOutline, CopyOutline, HelpCircleOutline, KeyOutline, OptionsOutline, RefreshOutline, SettingsOutline, ShieldCheckmarkOutline} from "@vicons/ionicons5"
+import {ClipboardSetText} from "../../wailsjs/runtime"
+import {onMounted, ref, watch} from "vue"
 import {useIndexStore} from "@/stores"
 import type {appType} from "@/types/app"
 import appApi from "@/api/app"
@@ -263,6 +352,65 @@ const renderKey = ref(999)
 
 const hostValidationFeedback = ref("")
 const portValidationFeedback = ref("")
+const wxFinderLoading = ref(false)
+const licenseCode = ref("")
+const licenseLoading = ref(false)
+const licenseOk = ref(false)
+const licenseExpires = ref("")
+const machineCode = ref("")
+const licenseStatusText = computed(() => {
+  if (!licenseOk.value) {
+    return t("license.missing")
+  }
+  if (!licenseExpires.value) {
+    return t("license.permanent")
+  }
+  return t("license.until", {date: licenseExpires.value})
+})
+
+const loadLicense = () => {
+  appApi.licenseStatus().then((res: any) => {
+    licenseOk.value = res.code === 1 && !!res.data?.ok
+    licenseExpires.value = res.data?.expires || ""
+    machineCode.value = res.data?.machine || ""
+  }).catch(() => {
+    licenseOk.value = false
+  })
+}
+
+const copyMachine = () => {
+  if (!machineCode.value) {
+    return
+  }
+  ClipboardSetText(machineCode.value).then(() => {
+    window?.$message?.success(t("common.copy_success"))
+  })
+}
+
+const updateLicense = () => {
+  const code = licenseCode.value.trim()
+  if (!code) {
+    window?.$message?.error(t("license.empty"))
+    return
+  }
+  licenseLoading.value = true
+  appApi.activateLicense(code).then((res: any) => {
+    if (res.code !== 1) {
+      window?.$message?.error(res.message || t("license.empty"))
+      return
+    }
+    licenseOk.value = true
+    licenseExpires.value = res.data?.expires || ""
+    licenseCode.value = ""
+    window?.$message?.success(licenseExpires.value ? t("license.until", {date: licenseExpires.value}) : t("license.ok"))
+  }).catch((err: any) => {
+    window?.$message?.error(String(err))
+  }).finally(() => {
+    licenseLoading.value = false
+  })
+}
+
+onMounted(loadLicense)
 
 watch(formValue.value, () => {
   formValue.value.Port = formValue.value.Port.trim()
@@ -314,6 +462,28 @@ const selectDir = () => {
 const resetHandle = ()=>{
   localStorage.clear()
   bind.ResetApp()
+}
+
+const adaptWxFinder = () => {
+  wxFinderLoading.value = true
+  appApi.wxFinderWeb().then((res: any) => {
+    if (res.code !== 1) {
+      window?.$message?.error(res.message)
+      return
+    }
+    if (res.data?.changed) {
+      window?.$message?.success(t("setting.wx_finder_done", {
+        path: res.data.path,
+        backup: res.data.backup
+      }), {duration: 8000})
+    } else {
+      window?.$message?.success(t("setting.wx_finder_already", {path: res.data.path}))
+    }
+  }).catch((err: any) => {
+    window?.$message?.error(String(err))
+  }).finally(() => {
+    wxFinderLoading.value = false
+  })
 }
 </script>
 <style lang="scss">

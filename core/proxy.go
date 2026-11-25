@@ -142,6 +142,9 @@ func (p *Proxy) matchPlugin(host string) shared.Plugin {
 }
 
 func (p *Proxy) httpRequestEvent(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+	if !Licensed() {
+		return r, nil
+	}
 	plugin := p.matchPlugin(r.Host)
 	if plugin != nil {
 		newReq, newResp := plugin.OnRequest(r, ctx)
@@ -157,7 +160,7 @@ func (p *Proxy) httpRequestEvent(r *http.Request, ctx *goproxy.ProxyCtx) (*http.
 }
 
 func (p *Proxy) httpResponseEvent(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
-	if resp == nil || resp.Request == nil {
+	if resp == nil || resp.Request == nil || !Licensed() {
 		return resp
 	}
 
